@@ -1,0 +1,68 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+.chart {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
+    min-height: 100vh;
+    width: 100vw;
+    padding: 50px;
+    font-family: "Helvetica Neue", "Arial", sans-serif;
+    font-size: 1em;
+    counter-reset: chart;
+}
+
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
+    margin-bottom: 10px;
+}
+
+.title {
+    font-size: 1.5em;
+    text-align: center;
+    font-weight: bold;
+    word-wrap: break-word;
+}
+
+.description {
+    word-wrap: break-word;
+    text-align: center;
+    font-size: 0.8em;
+    font-weight: 400;
+}
+
+.tooltip {
+    position: absolute;
+    visibility: hidden;
+    z-index: 50;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    padding: 5px;
+    background-color: rgba(0, 0, 0, 0.3);
+    color: white;
+    backdrop-filter: blur(5px);
+    font-size: smaller;
+}
+
+.label {
+    color: #000;
+    width: 100%;
+    height: 100%;
+    font-size: 8px;
+    padding: 2px;
+    overflow: hidden;
+    text-overflow: text-ellipsis;
+}
+
+svg {
+    counter-increment: chart;
+}
