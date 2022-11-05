@@ -4,16 +4,20 @@
     box-sizing: border-box;
 }
 
+body { 
+    width: 100vw;
+    font-family: "Helvetica Neue", "Arial", sans-serif;
+    font-size: 1em;
+    min-height: 100vh;
+    background: linear-gradient(lavender, #ebf8e1, pink);
+}
+
 .chart {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1em;
-    min-height: 100vh;
-    width: 100vw;
     padding: 50px;
-    font-family: "Helvetica Neue", "Arial", sans-serif;
-    font-size: 1em;
     counter-reset: chart;
 }
 
@@ -26,16 +30,22 @@
 }
 
 .title {
-    font-size: 1.5em;
     text-align: center;
-    font-weight: bold;
+    padding-top: 0.5em;
+    font-size: 1.2em;
+    font-weight: 500;
     word-wrap: break-word;
+}
+
+.header > .title {
+    font-size: 2em;
+    font-weight: 700;
 }
 
 .description {
     word-wrap: break-word;
+    font-size: 1em;
     text-align: center;
-    font-size: 0.8em;
     font-weight: 400;
 }
 
@@ -53,7 +63,7 @@
     font-size: smaller;
 }
 
-.label {
+.treemap-label {
     color: #000;
     width: 100%;
     height: 100%;
@@ -63,6 +73,36 @@
     text-overflow: text-ellipsis;
 }
 
-svg {
+.chart-type {
+    font-size: 1.5em;
+    text-transform: capitalize;
+    vertical-align: middle;
+    margin-top: 1em;
+}
+
+.chart-type::before {
     counter-increment: chart;
+    content: counter(chart) ".";
+    margin-right: 0.2em;
+}
+
+.target {
+    inline-size: 10px;
+    block-size: 10px;
+}
+
+.footer {
+    display: flex;
+    justify-content: center;
+    gap: 1em;
+}
+
+.footer a {
+    color: inherit;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+}
+
+.footer a:hover {
+    font-weight: bold;
 }
