@@ -1,27 +1,28 @@
-import { margin, width, height, mouseleave, mouseover, addTitle, addDescription, mousemove } from "./misc";
-
-const svg = d3.select('.chart')
-.append('svg')
- .attr('viewBox', '0 0 1000 700');
-
-addTitle(svg, 'Video Games Sales')
-addDescription(svg, 'Top 100 Most Sold Video Games Grouped by Platform')
-
-const map = svg.append('g')
-    .classed('map', true)
-    .attr('transform', `translate(${margin.left}, 140)`)
+import { 
+    margin, 
+    width, 
+    height, 
+    mouseleave, 
+    mouseover, 
+    addTitle, 
+    addDescription, 
+    mousemove 
+} from "./misc";
 
 const createLegends = (svg, names, colorsScale) => {
     svg.selectAll('rect')
         .data(names)
         .enter()
         .append('rect')
-            .attr('x', (d, i) => i * 45 + 80)
-            .attr('y', 0)
             .attr('width', 50)
             .attr('height', 10)
             .attr('fill', (d) => colorsScale(d))
             .style('fill-opacity', 0.6)
+        .transition()
+            .duration(500)
+            .ease(d3.easeQuadIn)
+            .attr('x', (d, i) => i * 45 + 80)
+            .attr('y', 0)
 
     svg.selectAll('text')
         .data(names)
@@ -30,11 +31,13 @@ const createLegends = (svg, names, colorsScale) => {
             .attr('x', (d, i) => i * 45 + 90)
             .attr('y', 20)
             .text((d) => d) 
-                .style('font-size', '10px')
-            
+                .style('font-size', '10px')     
 }
 
-export const drawTreeMap = (data) => {
+export const TreeMap = (svg, data, title, description) => {
+    const map = svg.append('g')
+        .classed('map', true)
+        .attr('transform', `translate(${margin.left}, 140)`)
     
     const root = d3.hierarchy(data).sum((d) => d.value);
     
@@ -60,8 +63,6 @@ export const drawTreeMap = (data) => {
         .classed('legends', true)
         .attr('transform', `translate(${margin.left}, 100)`)
 
-    createLegends(legends, categories, colors);
-
     const groups = map.selectAll('.group')
         .data(root.children)
         .enter()
@@ -77,7 +78,7 @@ export const drawTreeMap = (data) => {
             .attr('width', (d) => d.x1 - d.x0)
             .attr('height', (d) => (d.y1 - d.y0))
         .append('xhtml:div')
-            .attr('class', 'label')
+            .attr('class', 'treemap-label')
         .html((d) => `${d.data.name}`)
 
     const tiles = groups.selectAll('.tile')
@@ -86,13 +87,17 @@ export const drawTreeMap = (data) => {
         .append('rect')
             .attr('x', (d) => d.x0)
             .attr('y', (d) => d.y0)
-            .attr('width', (d) => d.x1 - d.x0)
-            .attr('height', (d) => d.y1 - d.y0)
             .style('fill', (d) => colors(d.parent.data.name))
             .style('fill-opacity', 0.6)
         .on('mouseover', mouseover)
         .on('mousemove', move)
         .on('mouseleave', mouseleave)
-        
-    
+        .transition()
+            .delay((d, i) => i * 100)
+            .duration(500)
+            .ease(d3.easeQuadIn)
+            .attr('width', (d) => d.x1 - d.x0)
+            .attr('height', (d) => d.y1 - d.y0)
+            .end()
+    .then(() => createLegends(legends, categories, colors))
 }
