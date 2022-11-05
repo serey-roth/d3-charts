@@ -1,12 +1,12 @@
-import { width, height, mousemove, mouseleave, mouseover, addTitle } from "./misc";
+import { 
+    width, 
+    height, 
+    mousemove, 
+    mouseleave, 
+    mouseover, 
+} from "./misc";
 
-const svg = d3.select('.chart')
-    .append('svg')
-        .attr('viewBox', '0 0 1000 700')
-
-export const drawBarChart = (data) => {   
-    addTitle(svg, 'United States GDP')
-
+export const BarChart = (svg, { data }) => {
     data.forEach(item => {
         const date = new Date(item[0]);
         const year = date.getFullYear();
@@ -37,12 +37,15 @@ export const drawBarChart = (data) => {
         .attr('class', 'bar')
         .attr('x', (d) => xScale(Number.parseFloat(d[0])))
         .attr('y', (d) => yScale(Number.parseFloat(d[1])))
-        .attr('width', 2.7)
         .attr('height', (d) => height - yScale(Number.parseFloat(d[1])))
         .attr('fill', 'orange')
     .on('mouseover', mouseover)
     .on('mousemove', move)
     .on('mouseleave', mouseleave)
+    .transition()
+        .delay((d, i) => i * 5)
+        .ease(d3.easeLinear)
+        .attr('width', 2.7)
 
     svg.append('g')
         .attr('id', 'x-axis')
