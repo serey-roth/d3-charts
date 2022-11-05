@@ -2,7 +2,7 @@ export const margin = { top: 10, left: 10 }
 
 export const width = 1000 - margin.left * 2;
 
-export const height = 650 - margin.top * 2;
+export const height = 850 - margin.top * 2;
 
 export const tooltip = d3.select('.chart')
     .append('div')
@@ -50,4 +50,38 @@ export const addDescription = (svg, description) => {
         .append('xhtml:p')
             .attr('class', 'description')
             .html(description)
+}
+
+export const createGradientLegends = (svg, legendTicks, colorsScale, promises,
+    coordinates='translate(700, 100)') => {
+    const legends = svg.append('g')
+        .attr('id', 'legends')
+        .attr('transform', coordinates)
+    
+    Promise.all(promises)
+    .then(() => {
+        legends.selectAll('rect')
+            .data(d3.range(...legendTicks.range()))
+            .enter()
+            .append('rect')
+                .attr('width', 1)
+                .attr('height', 10)
+                .attr('fill', (d) => colorsScale(legendTicks.invert(d)))
+                .transition()
+                    .duration(1000)
+                    .ease(d3.easeQuadIn)
+                    .attr('x', (d, i) => i)
+                    .attr('y', 0)
+
+        legends.call(d3.axisBottom(legendTicks)
+            .ticks(5)
+            .tickSize(15)
+            .tickFormat((d) => `${d}%`));
+            
+        legends.select('path')
+            .style('stroke', 'none')
+
+        legends.selectAll('line')
+            .style('stroke', 'black')
+    })
 }
