@@ -4,9 +4,8 @@ import {
     mousemove, 
     mouseleave,
     mouseover,
-    tooltip,
-    addTitle, 
-    addDescription
+    addDescription,
+    createGradientLegends
 } from "./misc";
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 
@@ -22,24 +21,17 @@ const createMatrix = (data) => {
     return matrix;
 }
 
-const svg = d3.select('.chart')
-        .append('svg')
-        .attr('viewBox', '0 0 1000 700')
-
-export const drawHeatMap = ({ baseTemperature: base, 
+export const HeatMap = (svg, { baseTemperature: base, 
     monthlyVariance: variances }) => {
-    
+
     const matrix = createMatrix(variances.slice(0))
     const variancesExtent = d3.extent(variances, (v) => base + v.variance)
     const years = Array.from(new Set(variances.map(v => v.year)))
     const yearsExtent = d3.extent(years)
 
-    //add description
-    addTitle(svg, 'Monthly Global Land-Surface Temperature');
     addDescription(svg, `${yearsExtent[0]} - 
     ${yearsExtent[1]}<br>(base temperature of ${base}°C)`);
     
-    //configure scales
     const monthsScale = d3.scaleBand()
     .domain(MONTHS)
     .range([100, height])
@@ -50,7 +42,7 @@ export const drawHeatMap = ({ baseTemperature: base,
 
     const colorsScale = d3.scaleSequential()
     .domain(variancesExtent)
-    .interpolator(d3.interpolatePlasma)
+    .interpolator(d3.interpolateRainbow)
     
     const move = (e) => {
         const { __data__: d } = e.target;
@@ -60,7 +52,6 @@ export const drawHeatMap = ({ baseTemperature: base,
         ${(Number.parseFloat(d.variance)).toFixed(2)}°C<br>`)
     }
 
-    //add rows, cells and color fills
     const columns  = svg.selectAll('.column') 
         .data(matrix)
         .enter()
@@ -73,61 +64,38 @@ export const drawHeatMap = ({ baseTemperature: base,
         .enter()
         .append("g")
             .attr("class", "cell")
-            .attr("transform", (d) => `translate(0, ${monthsScale(MONTHS[d.month - 1])})`)
+            .attr("transform", (d) => 
+            `translate(0, ${monthsScale(MONTHS[d.month - 1])})`)
             .style('stroke', 'none')
-            .on('mouseover', mouseover)
-            .on('mousemove', move)
-            .on('mouseleave', mouseleave)
+        .on('mouseover', mouseover)
+        .on('mousemove', move)
+        .on('mouseleave', mouseleave)
 
-    cells.append('rect')
-            .attr('width', 5)
+    const mapPromise = cells.append('rect')
+        .style('fill', ({ variance }) => colorsScale(variance + base))
+        .attr('width', 5)
+        .transition()
+            .delay(1000)
+            .duration(500)
+            .ease(d3.easeQuadIn)
             .attr('height', monthsScale.bandwidth())
-            .style('fill', ({ variance }) => colorsScale(variance + base))
+        .end()
             
-    //add axes
-    const xAxis = d3.axisBottom(yearsScale)
-        .ticks(null, 'd')
-
-    const yAxis = d3.axisLeft(monthsScale)
-        
     svg.append('g')
         .attr('id', 'xAxis')
         .attr('transform',  `translate(0, ${height})`)
-        .call(xAxis)
+        .call(d3.axisBottom(yearsScale)
+                .ticks(null, 'd'))
 
     svg.append('g')
         .attr('id', 'yAxis')
         .attr('transform', 'translate(40, 0)')
-        .call(yAxis)
+        .call(d3.axisLeft(monthsScale))
 
-    //add color legend
     const legendTicks = d3.scaleLinear()
     .domain(variancesExtent)
     .range([0, 200])
     .nice()
 
-    const legends = svg.append('g')
-        .attr('id', 'legends')
-        .attr('transform', `translate(${width - 200}, 50)`)
-
-    legends.selectAll('rect')
-    .data(d3.range(...legendTicks.range()))
-    .enter()
-    .append('rect')
-        .attr('x', (d, i) => i)
-        .attr('y', 0)
-        .attr('width', 1)
-        .attr('height', 10)
-        .attr('fill', (d) => colorsScale(legendTicks.invert(d)));
-
-    legends.call(d3.axisBottom(legendTicks)
-        .ticks(8)
-        .tickSize(15)
-        .tickFormat((d) => `${d}%`));
-
-    legends.select('path')
-        .style('stroke', 'none')
-
-    legends.selectAll('line')
-        .style('stroke', 'white')
+    createGradientLegends(svg, legendTicks, colorsScale, [mapPromise], `translate(${width - 200}, 50)`)
 }
